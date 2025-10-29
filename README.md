@@ -1939,4 +1939,1117 @@ class Solution {
 ✅ Works with **positive, negative, or zero** elements.
 ✅ Prefix Sum + HashMap is a **universal pattern** for many subarray problems.
 
+### 🧩 Problem Statement
+
+Given an unsorted integer array `nums`, return the **length of the longest consecutive sequence** of elements.
+You must implement an algorithm that runs in **O(n)** time.
+
+---
+
+### 🧠 Intuition
+
+The challenge is to find a **continuous range of numbers** (like 1,2,3,4...) present in the array, **without sorting** it (since sorting = O(n log n)).
+
+So, we use a **HashSet** to achieve O(1) lookups.
+
+---
+
+### 💡 Approach: Using HashSet
+
+#### Steps:
+
+1. **Store all elements in a HashSet**
+
+   * This removes duplicates and allows quick existence checks.
+2. **Iterate through each element `n` in the set**
+
+   * If `n - 1` does **not exist**, it means `n` is the **start of a sequence**.
+3. **Expand the sequence**
+
+   * Keep checking `n + 1`, `n + 2`, ... until the next number doesn’t exist.
+   * Count the length of this streak.
+4. **Track the maximum length** seen so far.
+
+---
+
+### 🔹 Code Explanation
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        // Edge case: empty array
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+
+        // Step 1: Store all numbers in a set
+        Set<Integer> set = new HashSet<>();
+        for (int i : nums) {
+            set.add(i);
+        }
+
+        int maxLength = 1;
+
+        // Step 2: Iterate through the set
+        for (int n : set) {
+            // Step 3: Only start counting if n is the start of a sequence
+            if (!set.contains(n - 1)) {
+                int currNum = n;
+                int currLen = 1;
+
+                // Step 4: Count consecutive numbers
+                while (set.contains(currNum + 1)) {
+                    currNum++;
+                    currLen++;
+                }
+
+                // Step 5: Update max length
+                maxLength = Math.max(maxLength, currLen);
+            }
+        }
+
+        return maxLength;
+    }
+}
+```
+
+---
+
+### 🧮 Dry Run Example
+
+**Input:**
+`nums = [100, 4, 200, 1, 3, 2]`
+
+| Step | Element      | `n-1` in set? | Sequence Formed | Current Length | Max Length |
+| ---- | ------------ | ------------- | --------------- | -------------- | ---------- |
+| 100  | ❌            | [100]         | 1               | 1              |            |
+| 4    | ✅ (3 in set) | skip          | -               | 1              |            |
+| 200  | ❌            | [200]         | 1               | 1              |            |
+| 1    | ❌            | [1, 2, 3, 4]  | 4               | **4**          |            |
+| 3    | ✅            | skip          | -               | 4              |            |
+| 2    | ✅            | skip          | -               | 4              |            |
+
+✅ **Output:** `4`
+The longest consecutive sequence is `[1, 2, 3, 4]`.
+
+---
+
+### ⏱️ Time and Space Complexity
+
+| Type      | Complexity | Explanation                                                                          |
+| --------- | ---------- | ------------------------------------------------------------------------------------ |
+| **Time**  | O(n)       | Each number is processed at most twice (once for checking and once while expanding). |
+| **Space** | O(n)       | For storing elements in the HashSet.                                                 |
+
+---
+
+### 🧠 Key Insights
+
+✅ Using a HashSet avoids sorting → achieves **O(n)** complexity.
+✅ Start counting **only when `n - 1` is missing**, to avoid double-counting.
+✅ Handles unsorted arrays and duplicates seamlessly.
+
+---
+
+### 🔥 Related Problems
+
+| Problem                           | Concept              |
+| --------------------------------- | -------------------- |
+| 🟩 Missing Number                 | XOR / Sum approach   |
+| 🟩 Longest Increasing Subsequence | Dynamic Programming  |
+| 🟩 Longest Subarray with Sum K    | Prefix Sum + HashMap |
+| 🟩 Consecutive Numbers Sum        | Math, Sequence       |
+
+---
+
+### 🏁 Final Notes
+
+* This is one of the **most popular HashSet-based problems** in DSA interviews.
+* It demonstrates your understanding of **O(1) lookups**, **sequence logic**, and **loop optimization**.
+* Often asked by **FAANG** companies.
+
+## 🧩 Problem: **Set Matrix Zeroes**
+
+### 🔍 Problem Statement
+
+You are given an `m x n` matrix.
+If any element in the matrix is `0`, set its **entire row and column** to `0`.
+
+You must do this **in place**, i.e., modify the same matrix (not create a new one).
+
+---
+
+### 💡 Example
+
+**Input:**
+
+```
+[
+ [1, 2, 3],
+ [4, 0, 6],
+ [7, 8, 9]
+]
+```
+
+**Output:**
+
+```
+[
+ [1, 0, 3],
+ [0, 0, 0],
+ [7, 0, 9]
+]
+```
+
+---
+
+### 🧠 Intuition
+
+When we find a `0` in the matrix,
+→ The **entire row and column** containing that `0` should become `0`.
+
+If we start setting them to `0` immediately,
+we’ll **lose information** about other zeroes that might appear later.
+
+So, we:
+
+1. First **mark** which rows and columns need to be zeroed.
+2. Then, in a second pass, we **update** the matrix based on those marks.
+
+---
+
+### 🪄 Approach
+
+#### Step 1: Initialize helper arrays
+
+Create two arrays:
+
+* `row[n]` → to mark rows that should be zeroed
+* `col[m]` → to mark columns that should be zeroed
+
+Both start with all `0`s.
+
+#### Step 2: Traverse matrix to mark zero positions
+
+Loop through the matrix:
+If `matrix[i][j] == 0`, then:
+
+```
+row[i] = 1
+col[j] = 1
+```
+
+This means row `i` and column `j` must be set to `0` later.
+
+#### Step 3: Update matrix
+
+Traverse matrix again.
+If `row[i] == 1` **or** `col[j] == 1`,
+then set `matrix[i][j] = 0`.
+
+---
+
+### 🧩 Dry Run
+
+**Input:**
+
+```
+[
+ [1, 2, 3],
+ [4, 0, 6],
+ [7, 8, 9]
+]
+```
+
+**After marking zeroes:**
+
+```
+row = [0, 1, 0]
+col = [0, 1, 0]
+```
+
+**After updating matrix:**
+
+```
+[
+ [1, 0, 3],
+ [0, 0, 0],
+ [7, 0, 9]
+]
+```
+
+---
+
+### 🧮 Time & Space Complexity
+
+| Operation                       | Complexity   |
+| ------------------------------- | ------------ |
+| Traversing matrix twice         | **O(n × m)** |
+| Extra space for row[] and col[] | **O(n + m)** |
+
+---
+
+### ⚡ Optimized Approach (In-Place, O(1) Space)
+
+Use the **first row and first column of the matrix** itself as markers
+instead of creating extra arrays.
+
+Steps:
+
+1. Use `matrix[0][j]` and `matrix[i][0]` to mark.
+2. Keep flags to track if first row or first column originally had zeroes.
+3. Update rest of matrix accordingly.
+
+This brings space down to **O(1)**.
+
+---
+
+### 🏁 Final Code (Your Version)
+
+```java
+class Solution {
+    public void setZeroes(int[][] matrix) {
+        int n = matrix.length;
+        int m = matrix[0].length;
+        int row[] = new int[n];
+        int col[] = new int[m];
+
+        // Step 1: Mark rows and columns that need to be zeroed
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (matrix[i][j] == 0) {
+                    row[i] = 1;
+                    col[j] = 1;
+                }
+            }
+        }
+
+        // Step 2: Set elements to zero based on marks
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (row[i] == 1 || col[j] == 1) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+### 🧷 Key Takeaways
+
+* Always mark first before modifying.
+* Extra arrays help avoid overwriting data.
+* Optimized version uses **matrix itself as marker** → saves space.
+
+## 🧩 Problem: **Rotate Image / Matrix by 90° Clockwise**
+
+### 🔍 Problem Statement
+
+You’re given an `n x n` 2D matrix.
+Rotate the matrix **90° clockwise**, **in place** (i.e., without using any extra space).
+
+---
+
+### 💡 Example
+
+**Input:**
+
+```
+[
+ [1, 2, 3],
+ [4, 5, 6],
+ [7, 8, 9]
+]
+```
+
+**Output:**
+
+```
+[
+ [7, 4, 1],
+ [8, 5, 2],
+ [9, 6, 3]
+]
+```
+
+---
+
+### 🧠 Intuition
+
+A 90° clockwise rotation can be done in **two steps**:
+
+1. **Transpose the matrix** — convert rows into columns.
+2. **Reverse each row** — to align elements correctly for the clockwise direction.
+
+That’s exactly what your code does ✅
+
+---
+
+### 🪄 Step-by-Step Approach
+
+#### 🔹 Step 1: Transpose the matrix
+
+Swap `matrix[i][j]` with `matrix[j][i]` for all `i < j`.
+
+After this, rows become columns.
+
+**Example after transpose:**
+
+```
+Before:
+1 2 3
+4 5 6
+7 8 9
+
+After transpose:
+1 4 7
+2 5 8
+3 6 9
+```
+
+#### 🔹 Step 2: Reverse each row
+
+Swap elements horizontally (start ↔ end).
+
+**After reversing each row:**
+
+```
+7 4 1
+8 5 2
+9 6 3
+```
+
+✅ That’s the 90° rotated matrix!
+
+---
+
+### 🧩 Dry Run
+
+**Input Matrix:**
+
+```
+[
+ [1, 2, 3],
+ [4, 5, 6],
+ [7, 8, 9]
+]
+```
+
+#### ➤ After Transpose:
+
+| i | j | swap(matrix[i][j], matrix[j][i]) |
+| - | - | -------------------------------- |
+| 0 | 1 | swap(2,4) → [1,4,3;2,5,6;7,8,9]  |
+| 0 | 2 | swap(3,7) → [1,4,7;2,5,6;3,8,9]  |
+| 1 | 2 | swap(6,8) → [1,4,7;2,5,8;3,6,9]  |
+
+**Matrix now:**
+
+```
+1 4 7
+2 5 8
+3 6 9
+```
+
+#### ➤ Reverse each row:
+
+Row 1 → [1,4,7] → [7,4,1]
+Row 2 → [2,5,8] → [8,5,2]
+Row 3 → [3,6,9] → [9,6,3]
+
+**Final Rotated Matrix:**
+
+```
+7 4 1
+8 5 2
+9 6 3
+```
+
+---
+
+### 🧮 Time & Space Complexity
+
+| Operation        | Complexity |
+| ---------------- | ---------- |
+| Transpose matrix | **O(n²)**  |
+| Reverse rows     | **O(n²)**  |
+| Extra space      | **O(1)**   |
+
+---
+
+### 🏁 Final Code (Your Version)
+
+```java
+class Solution {
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+
+        // Step 1: Transpose the matrix
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+
+        // Step 2: Reverse each row
+        int s = 0, e = n - 1;
+        while (s < e) {
+            for (int i = 0; i < n; i++) {
+                int temp = matrix[i][s];
+                matrix[i][s] = matrix[i][e];
+                matrix[i][e] = temp;
+            }
+            s++;
+            e--;
+        }
+    }
+}
+```
+
+---
+
+### ⚡ Alternate (Simpler) Row Reversal Using Built-in Swap Logic
+
+Instead of using two pointers (`s`, `e`),
+you can directly reverse each row in a nested loop:
+
+```java
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n / 2; j++) {
+        int temp = matrix[i][j];
+        matrix[i][j] = matrix[i][n - j - 1];
+        matrix[i][n - j - 1] = temp;
+    }
+}
+```
+
+---
+
+### 🧷 Key Takeaways
+
+* **Transpose + Reverse = 90° Clockwise Rotation** ✅
+* Both steps take **O(n²)** time and **O(1)** space.
+* Works **in place** (no extra matrix needed).
+
+
+## 🌀 **Spiral Matrix Traversal — Full Notes with Code**
+
+### 💡 **Problem Statement**
+
+Given an `n x m` matrix, return all elements in **spiral order** (clockwise).
+
+---
+
+### ⚙️ **Approach**
+
+We use **four boundary pointers**:
+
+* `top` → starting row
+* `bottom` → ending row
+* `left` → starting column
+* `right` → ending column
+
+We move in **4 directions**:
+
+1. Left → Right
+2. Top → Bottom
+3. Right → Left
+4. Bottom → Top
+
+After completing one full outer layer, we move inward by updating the boundaries.
+
+---
+
+### 🧠 **Algorithm Steps**
+
+```text
+1. Initialize: top = 0, bottom = n-1, left = 0, right = m-1
+2. While not all elements are visited:
+   a. Traverse top row (left → right)
+   b. Traverse right column (top → bottom)
+   c. Traverse bottom row (right → left)
+   d. Traverse left column (bottom → top)
+   e. Move inward: top++, bottom--, left++, right--
+```
+
+---
+
+### 💻 **Code Implementation (Java)**
+
+```java
+class Solution {
+    public List<Integer> spiralOrder(int[][] mat) {
+        int n = mat.length;       // number of rows
+        int m = mat[0].length;    // number of columns
+        List<Integer> ans = new ArrayList<>();
+
+        // Define boundaries
+        int top = 0, bottom = n - 1, left = 0, right = m - 1;
+        int totalElements = 0;
+
+        // Traverse until all elements are covered
+        while (totalElements < n * m) {
+
+            // Step 1: Left → Right
+            for (int i = left; i <= right && totalElements < n * m; i++) {
+                ans.add(mat[top][i]);
+                totalElements++;
+            }
+            top++;
+
+            // Step 2: Top → Bottom
+            for (int i = top; i <= bottom && totalElements < n * m; i++) {
+                ans.add(mat[i][right]);
+                totalElements++;
+            }
+            right--;
+
+            // Step 3: Right → Left
+            for (int i = right; i >= left && totalElements < n * m; i--) {
+                ans.add(mat[bottom][i]);
+                totalElements++;
+            }
+            bottom--;
+
+            // Step 4: Bottom → Top
+            for (int i = bottom; i >= top && totalElements < n * m; i--) {
+                ans.add(mat[i][left]);
+                totalElements++;
+            }
+            left++;
+        }
+
+        return ans;
+    }
+}
+```
+
+---
+
+### 🧩 **Dry Run Example**
+
+#### Input Matrix:
+
+```
+1   2   3
+4   5   6
+7   8   9
+```
+
+#### Step-by-step Traversal:
+
+| Step | Direction    | Visited Elements            | Boundaries Updated |
+| ---- | ------------ | --------------------------- | ------------------ |
+| 1    | Left → Right | [1, 2, 3]                   | top = 1            |
+| 2    | Top → Bottom | [1, 2, 3, 6, 9]             | right = 1          |
+| 3    | Right → Left | [1, 2, 3, 6, 9, 8, 7]       | bottom = 1         |
+| 4    | Bottom → Top | [1, 2, 3, 6, 9, 8, 7, 4]    | left = 1           |
+| 5    | Left → Right | [1, 2, 3, 6, 9, 8, 7, 4, 5] | top = 2            |
+
+✅ **All elements visited → Stop**
+
+---
+
+### 🔁 **Output**
+
+```
+[1, 2, 3, 6, 9, 8, 7, 4, 5]
+```
+
+---
+
+### 📊 **Time & Space Complexity**
+
+| Type     | Complexity   | Explanation                                  |
+| -------- | ------------ | -------------------------------------------- |
+| ⏱ Time   | **O(n × m)** | Every element visited once                   |
+| 💾 Space | **O(1)**     | Constant extra space (excluding result list) |
+
+---
+
+### 📘 **Visualization**
+
+```
+Initial Matrix:
+1 → 2 → 3
+↓       ↓
+4       6
+↓       ↓
+7 ← 8 ← 9
+
+Then move inside:
+       5
+```
+
+## 💡 **Problem: Maximum Product Subarray**
+
+You are given an integer array `arr[]`.
+Find the **contiguous subarray** within it that has the **largest product** and return that product.
+
+---
+
+### 🧠 **Key Idea**
+
+Unlike **maximum subarray sum**, here multiplication changes behavior when negatives are involved.
+
+* Multiplying by a **negative number** flips the sign.
+* So the **maximum** product so far can become the **minimum**, and vice versa.
+
+Hence, we track **both max and min product** at each step.
+
+---
+
+### ⚙️ **Approach**
+
+We maintain three variables:
+
+1. `maxProduct1` → maximum product ending at current index
+2. `minProduct2` → minimum product ending at current index
+3. `product` → overall maximum product found so far
+
+At each element:
+
+* Compute:
+
+  ```java
+  tempMax = max(arr[i], maxProduct1 * arr[i], minProduct2 * arr[i])
+  minProduct2 = min(arr[i], maxProduct1 * arr[i], minProduct2 * arr[i])
+  maxProduct1 = tempMax
+  product = max(product, maxProduct1)
+  ```
+
+This handles:
+
+* Negative numbers (swap effect)
+* Zeros (reset point)
+* Positives (normal multiplication)
+
+---
+
+### 💻 **Code**
+
+```java
+import java.util.*;
+
+class Solution {
+    public int maxProduct(int arr[]) {
+        int n = arr.length;
+
+        int maxProduct1 = arr[0];  // max product ending here
+        int minProduct2 = arr[0];  // min product ending here
+        int product = arr[0];      // global max product
+
+        for (int i = 1; i < n; i++) {
+            int tempMax = Math.max(arr[i], Math.max(maxProduct1 * arr[i], minProduct2 * arr[i]));
+            minProduct2 = Math.min(arr[i], Math.min(maxProduct1 * arr[i], minProduct2 * arr[i]));
+            maxProduct1 = tempMax;
+
+            product = Math.max(product, maxProduct1);
+        }
+        return product;
+    }
+}
+```
+
+---
+
+### 🔁 **Dry Run Example**
+
+#### Input:
+
+```
+arr = [2, 3, -2, 4]
+```
+
+| i | arr[i] | maxProduct1             | minProduct2              | product | Explanation            |
+| - | ------ | ----------------------- | ------------------------ | ------- | ---------------------- |
+| 0 | 2      | 2                       | 2                        | 2       | Initialize             |
+| 1 | 3      | max(3, 2×3, 2×3)=6      | min(3, 2×3, 2×3)=3       | 6       | 2×3=6                  |
+| 2 | -2     | max(-2, 6×-2, 3×-2)= -2 | min(-2, 6×-2, 3×-2)= -12 | 6       | Sign flips             |
+| 3 | 4      | max(4, -2×4, -12×4)=4   | min(4, -2×4, -12×4)= -48 | 6       | 4 positive, resets max |
+
+✅ **Output:** `6`
+
+(From subarray `[2, 3]`)
+
+---
+
+### ⚡ **Another Example**
+
+```
+arr = [-2, 0, -1]
+```
+
+| Step | arr[i] | maxProduct1 | minProduct2 | product |
+| ---- | ------ | ----------- | ----------- | ------- |
+| 0    | -2     | -2          | -2          | -2      |
+| 1    | 0      | 0           | 0           | 0       |
+| 2    | -1     | -1          | -1          | 0       |
+
+✅ Output: `0`
+(Best subarray is `[0]`)
+
+---
+
+### 📊 **Complexity Analysis**
+
+| Type     | Complexity | Explanation               |
+| -------- | ---------- | ------------------------- |
+| ⏱ Time   | **O(n)**   | Single pass through array |
+| 💾 Space | **O(1)**   | Constant extra space      |
+
+---
+
+### 🧩 **Summary**
+
+| Variable      | Meaning                         |
+| ------------- | ------------------------------- |
+| `maxProduct1` | Max product up to current index |
+| `minProduct2` | Min product up to current index |
+| `product`     | Overall max product             |
+
+✅ Handles positives, negatives, and zeros efficiently.
+✅ Works in one pass.
+
+
+# 🚀 **Problem: 3Sum**
+
+### 🧠 Problem Statement:
+
+Given an integer array `nums`, return **all unique triplets** `[nums[i], nums[j], nums[k]]`
+such that:
+
+```
+i != j, i != k, j != k
+and
+nums[i] + nums[j] + nums[k] == 0
+```
+
+The solution set must **not contain duplicate triplets**.
+
+---
+
+## ⚙️ Approach — Two Pointer after Sorting
+
+### 🔍 Intuition:
+
+We need 3 numbers whose sum is **0**.
+If we fix one number (`nums[i]`), the problem reduces to **2-sum** for the remaining array:
+
+```
+Find two numbers whose sum = -nums[i]
+```
+
+We can efficiently find this using the **two-pointer technique** after sorting.
+
+---
+
+## 🪜 Step-by-Step Approach
+
+### Step 1️⃣ — Sort the Array
+
+We sort the array to:
+
+* Make it easier to skip duplicates.
+* Use two-pointer traversal for the remaining elements.
+
+Example:
+
+```
+Input: nums = [-1, 0, 1, 2, -1, -4]
+Sorted: [-4, -1, -1, 0, 1, 2]
+```
+
+---
+
+### Step 2️⃣ — Fix one element (nums[i])
+
+For each element `nums[i]` (up to `n-2`):
+
+* Set `p1 = i + 1` (left pointer)
+* Set `p2 = n - 1` (right pointer)
+
+Now, check the sum:
+
+```
+sum = nums[i] + nums[p1] + nums[p2]
+```
+
+---
+
+### Step 3️⃣ — Apply Two-Pointer Logic
+
+We adjust pointers based on the sum:
+
+| Case         | Condition          | Action                               |
+| ------------ | ------------------ | ------------------------------------ |
+| ✅ `sum == 0` | Found a triplet    | Add it to result set; increment `p1` |
+| 🔼 `sum < 0` | Need a larger sum  | Move `p1++` (right → higher value)   |
+| 🔽 `sum > 0` | Need a smaller sum | Move `p2--` (left → smaller value)   |
+
+---
+
+### Step 4️⃣ — Avoid Duplicates
+
+To prevent repeated triplets:
+
+* Use a **Set** (like `HashSet<List<Integer>>`) since Lists with same elements are equal in a set.
+* Alternatively, after sorting, you can skip repeated `nums[i]` and `nums[p1]`.
+
+---
+
+## 🧩 Example Dry Run
+
+### Input:
+
+```
+nums = [-1, 0, 1, 2, -1, -4]
+```
+
+### After Sorting:
+
+```
+[-4, -1, -1, 0, 1, 2]
+```
+
+| i | nums[i] | p1 | p2 | sum | Action                | Result                    |
+| - | ------- | -- | -- | --- | --------------------- | ------------------------- |
+| 0 | -4      | 1  | 5  | -3  | sum<0 → p1++          | —                         |
+| 0 | -4      | 2  | 5  | -3  | sum<0 → p1++          | —                         |
+| 0 | -4      | 3  | 5  | -2  | sum<0 → p1++          | —                         |
+| 0 | -4      | 4  | 5  | -1  | sum<0 → p1++          | —                         |
+| 1 | -1      | 2  | 5  | 0   | ✅ triplet (-1, -1, 2) | [[-1, -1, 2]]             |
+| 1 | -1      | 3  | 4  | 0   | ✅ triplet (-1, 0, 1)  | [[-1, -1, 2], [-1, 0, 1]] |
+| 2 | -1      | 3  | 5  | 1   | sum>0 → p2--          | —                         |
+
+✅ Final Output: `[[ -1, -1, 2 ], [ -1, 0, 1 ]]`
+
+---
+
+## 🧮 Code Implementation
+
+```java
+import java.util.*;
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums); // Step 1: sort the array
+        Set<List<Integer>> ans = new HashSet<>();
+
+        for (int i = 0; i < nums.length - 2; i++) {
+            int p1 = i + 1;
+            int p2 = nums.length - 1;
+
+            while (p1 < p2) {
+                int sum = nums[i] + nums[p1] + nums[p2];
+                if (sum == 0) {
+                    ans.add(List.of(nums[i], nums[p1], nums[p2]));
+                    p1++;
+                    p2--;
+                } else if (sum < 0) {
+                    p1++;
+                } else {
+                    p2--;
+                }
+            }
+        }
+        return new ArrayList<>(ans);
+    }
+}
+```
+
+---
+
+## ⏱️ Time & Space Complexity
+
+| Complexity       | Explanation                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| **Time:** O(n²)  | Sorting = O(n log n), and for each element, we use two-pointer = O(n) |
+| **Space:** O(n²) | In worst case, storing all unique triplets in the set                 |
+
+---
+
+## 🧠 Key Takeaways
+
+✅ Sort the array first → simplifies duplicate handling
+✅ Use two-pointer technique for O(n²) solution
+✅ A `Set` automatically filters duplicate triplets
+✅ Better than brute force O(n³)
+
+
+# 📘 4Sum Problem — Notes
+
+---
+
+## 🧩 Problem Statement
+
+Find all unique quadruplets `[a, b, c, d]` in the array such that:
+
+```
+a + b + c + d == target
+```
+
+---
+
+## 💡 Key Idea
+
+This problem is an **extension of the 2Sum and 3Sum problems**.
+We use sorting + two-pointer technique.
+
+---
+
+## 🔧 Approach
+
+1. **Sort the array** to handle duplicates and apply two-pointer logic easily.
+2. **Fix first two numbers** using nested loops:
+
+   * Outer loop → `i` (0 to n−4)
+   * Inner loop → `j` (i+1 to n−3)
+3. **Apply two-pointer** on the remaining array:
+
+   * `k = j + 1`
+   * `l = n - 1`
+4. Compute sum:
+
+   ```
+   sum = nums[i] + nums[j] + nums[k] + nums[l]
+   ```
+5. **Compare with target:**
+
+   * If `sum == target` → store the quadruplet
+   * If `sum < target` → move `k++`
+   * If `sum > target` → move `l--`
+6. Use `Set` or skip duplicates manually to ensure unique quadruplets.
+
+---
+
+## 🧠 Important Points
+
+✅ Sort array before processing
+✅ Use `long` for sum to avoid overflow
+✅ Handle duplicates using Set or conditions
+✅ Use two-pointer for efficiency
+
+---
+
+## ⏱️ Complexity
+
+| Type  | Complexity                     |
+| ----- | ------------------------------ |
+| Time  | O(n³)                          |
+| Space | O(k) — for storing quadruplets |
+
+---
+
+## 🧾 Example
+
+### Input:
+
+```
+nums = [1, 0, -1, 0, -2, 2]
+target = 0
+```
+
+### Sorted:
+
+```
+[-2, -1, 0, 0, 1, 2]
+```
+
+### Output:
+
+```
+[[-2, -1, 1, 2],
+ [-2, 0, 0, 2],
+ [-1, 0, 0, 1]]
+```
+
+---
+
+## 🧰 Code (Using Set)
+
+```java
+import java.util.*;
+
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        Set<List<Integer>> set = new HashSet<>();
+
+        for (int i = 0; i < n - 3; i++) {
+            for (int j = i + 1; j < n - 2; j++) {
+                int k = j + 1, l = n - 1;
+                while (k < l) {
+                    long sum = (long) nums[i] + nums[j] + nums[k] + nums[l];
+                    if (sum == target) {
+                        set.add(List.of(nums[i], nums[j], nums[k], nums[l]));
+                        k++;
+                        l--;
+                    } else if (sum < target) {
+                        k++;
+                    } else {
+                        l--;
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(set);
+    }
+}
+```
+
+---
+
+## 🚀 Optimized Version (Without Set)
+
+```java
+import java.util.*;
+
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        int n = nums.length;
+
+        for (int i = 0; i < n - 3; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            for (int j = i + 1; j < n - 2; j++) {
+                if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+                int k = j + 1, l = n - 1;
+
+                while (k < l) {
+                    long sum = (long) nums[i] + nums[j] + nums[k] + nums[l];
+                    if (sum == target) {
+                        res.add(Arrays.asList(nums[i], nums[j], nums[k], nums[l]));
+                        while (k < l && nums[k] == nums[k + 1]) k++;
+                        while (k < l && nums[l] == nums[l - 1]) l--;
+                        k++; l--;
+                    } else if (sum < target) k++;
+                    else l--;
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+
+---
+
+## 🧩 Summary Table
+
+| Step | Action              | Purpose                   |
+| ---- | ------------------- | ------------------------- |
+| 1    | Sort the array      | Enables two-pointer logic |
+| 2    | Fix two numbers     | Reduce problem size       |
+| 3    | Two-pointer on rest | Find matching pairs       |
+| 4    | Handle duplicates   | Avoid repeated results    |
+| 5    | Store valid sets    | Return final result       |
+
 
