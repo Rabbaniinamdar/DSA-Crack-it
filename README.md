@@ -3209,4 +3209,203 @@ for (int i = 1; i <= n; i++) {
 }
 ```
 
+# 📘 **Count Inversions in an Array**
 
+---
+
+## 🧩 **Problem Statement**
+
+Given an array `arr[]`, count the number of **inversions** in it.
+An inversion is a pair `(i, j)` such that:
+
+[
+i < j \text{ and } arr[i] > arr[j]
+]
+
+### Example:
+
+```
+Input: arr = [5, 4, 3, 2, 1]
+Output: 10
+Explanation:
+All pairs are inverted because array is sorted in descending order.
+```
+
+---
+
+## 💡 **Intuition**
+
+* Inversions indicate how far the array is from being sorted.
+* A sorted array has `0` inversions.
+* A completely reverse-sorted array has maximum inversions = `n*(n-1)/2`.
+
+Naive solution would be to check every pair → **O(n²)**.
+We can optimize it using **Merge Sort**, which counts inversions while sorting → **O(n log n)**.
+
+---
+
+## ⚙️ **Approach (Using Merge Sort)**
+
+### 🔹 Step 1: Divide and Conquer
+
+We recursively divide the array into two halves:
+
+* Left half
+* Right half
+
+### 🔹 Step 2: Count inversions
+
+There are 3 types of inversions:
+
+1. **Left inversions** → counted in left half recursion.
+2. **Right inversions** → counted in right half recursion.
+3. **Split inversions** → counted while merging both halves.
+
+A split inversion occurs when an element in the left half is greater than an element in the right half.
+
+---
+
+## 🧠 **Key Insight**
+
+When merging two sorted halves:
+
+If
+[
+arr[left] > arr[right]
+]
+then all remaining elements in the left half
+(from `left` to `mid`)
+will also be greater than `arr[right]`.
+
+Hence,
+[
+\text{count} += (mid - left + 1)
+]
+
+---
+
+## 🧾 **Code Explanation**
+
+```java
+private static int merge(int[] arr, int low, int mid, int high) {
+    ArrayList<Integer> temp = new ArrayList<>();
+    int left = low, right = mid + 1;
+    int cnt = 0;
+
+    // Merge while counting inversions
+    while (left <= mid && right <= high) {
+        if (arr[left] <= arr[right]) {
+            temp.add(arr[left]);
+            left++;
+        } else {
+            temp.add(arr[right]);
+            cnt += (mid - left + 1); // <-- key step
+            right++;
+        }
+    }
+
+    // Copy remaining elements
+    while (left <= mid) temp.add(arr[left++]);
+    while (right <= high) temp.add(arr[right++]);
+
+    // Copy sorted elements back to arr
+    for (int i = low; i <= high; i++) arr[i] = temp.get(i - low);
+
+    return cnt;
+}
+
+public static int mergeSort(int[] arr, int low, int high) {
+    int cnt = 0;
+    if (low >= high) return cnt;
+
+    int mid = (low + high) / 2;
+
+    cnt += mergeSort(arr, low, mid);       // Left half
+    cnt += mergeSort(arr, mid + 1, high);  // Right half
+    cnt += merge(arr, low, mid, high);     // Count cross inversions
+
+    return cnt;
+}
+
+public static int numberOfInversions(int[] a, int n) {
+    return mergeSort(a, 0, n - 1);
+}
+```
+
+---
+
+## 🧮 **Dry Run**
+
+### Input:
+
+`arr = [5, 4, 3, 2, 1]`
+
+#### Step 1: Split recursively
+
+```
+[5,4,3,2,1]
+ -> [5,4,3] and [2,1]
+ -> [5,4], [3] and [2], [1]
+```
+
+#### Step 2: Merge and Count
+
+1. Merge [5] and [4]:
+
+   * 5 > 4 → count = 1
+     → [4,5]
+
+2. Merge [4,5] and [3]:
+
+   * 4 > 3 → +2 (since both 4 and 5 > 3)
+     → count = 3
+     → [3,4,5]
+
+3. Merge [2] and [1]:
+
+   * 2 > 1 → +1
+     → count = 4
+     → [1,2]
+
+4. Merge [3,4,5] and [1,2]:
+
+   * 3 > 1 → +3
+   * 3 > 2 → +3
+   * 4 > 2 → +2
+   * 5 > 2 → +2
+     → total = 10 inversions
+
+Final count = **10**
+
+---
+
+## ⏱️ **Time & Space Complexity**
+
+| Operation        | Complexity                 |
+| ---------------- | -------------------------- |
+| Merge Sort Split | O(log n)                   |
+| Merge Operation  | O(n)                       |
+| **Overall**      | **O(n log n)**             |
+| **Space**        | **O(n)** (temporary array) |
+
+---
+
+## ✅ **Output**
+
+```
+The number of inversions are: 10
+```
+
+---
+
+## 🧠 Summary
+
+| Concept          | Description                    |
+| ---------------- | ------------------------------ |
+| Problem Type     | Array, Divide & Conquer        |
+| Algorithm        | Modified Merge Sort            |
+| Time Complexity  | O(n log n)                     |
+| Space Complexity | O(n)                           |
+| Key Idea         | Count inversions while merging |
+
+---
