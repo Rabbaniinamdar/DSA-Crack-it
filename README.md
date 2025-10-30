@@ -3409,3 +3409,202 @@ The number of inversions are: 10
 | Key Idea         | Count inversions while merging |
 
 ---
+
+## 🧠 **Reverse Pairs Using Merge Sort — Notes**
+
+---
+
+### 🔹 **Problem Statement**
+
+You are given an array `arr[]` of integers.
+You need to count the number of **reverse pairs** such that:
+
+```
+i < j  and  arr[i] > 2 * arr[j]
+```
+
+For example:
+If `arr = [4, 1, 2, 3, 1]`
+Then valid pairs are:
+
+* (4, 1) → indices (0, 1)
+* (4, 1) → indices (0, 4)
+* (2, 1) → indices (2, 4)
+* (3, 1) → indices (3, 4)
+
+✅ Total reverse pairs = 4
+
+---
+
+## ⚙️ **Approach — Modified Merge Sort**
+
+This problem is a **variation of inversion count**, but with a modified condition
+`arr[i] > 2 * arr[j]`.
+
+We use **merge sort** to:
+
+1. **Divide** the array.
+2. **Count pairs** during merging.
+3. **Merge back** sorted halves.
+
+---
+
+## 🔧 **Step-by-Step Explanation**
+
+### 🔸 1. `mergeSort()`
+
+Performs standard merge sort and adds logic to count reverse pairs.
+
+```java
+public static int mergeSort(int[] arr, int low, int high) {
+    int cnt = 0;
+    if (low >= high) return cnt;
+    int mid = (low + high) / 2;
+
+    // Step 1: Sort left half
+    cnt += mergeSort(arr, low, mid);
+
+    // Step 2: Sort right half
+    cnt += mergeSort(arr, mid + 1, high);
+
+    // Step 3: Count pairs (cross-half)
+    cnt += countPairs(arr, low, mid, high);
+
+    // Step 4: Merge sorted halves
+    merge(arr, low, mid, high);
+
+    return cnt;
+}
+```
+
+🟢 **Key Idea:**
+Both halves (`low → mid` and `mid+1 → high`) are sorted,
+so we can use **two pointers** to efficiently count valid pairs.
+
+---
+
+### 🔸 2. `countPairs()`
+
+Counts the number of reverse pairs between two sorted halves.
+
+```java
+public static int countPairs(int[] arr, int low, int mid, int high) {
+    int right = mid + 1;
+    int cnt = 0;
+
+    for (int i = low; i <= mid; i++) {
+        while (right <= high && arr[i] > 2 * arr[right])
+            right++;
+        cnt += (right - (mid + 1));
+    }
+    return cnt;
+}
+```
+
+#### 🧮 Example Walkthrough:
+
+For `arr = [4, 1, 2, 3, 1]`, consider left = `[4, 1, 2]` and right = `[3, 1]`
+When `i = 0 (arr[i] = 4)`:
+
+* Compare with right half:
+
+  * `4 > 2*3 → false`
+  * `4 > 2*1 → true` → ✅ Count 1 pair.
+
+Continue for all `i` in left half.
+
+🟢 Since both halves are **sorted**,
+you don’t need to reset `right` pointer every time.
+You move it only forward, ensuring O(n) traversal per merge step.
+
+---
+
+### 🔸 3. `merge()`
+
+Standard merge logic to keep array sorted after each recursive call.
+
+```java
+private static void merge(int[] arr, int low, int mid, int high) {
+    ArrayList<Integer> temp = new ArrayList<>();
+    int left = low, right = mid + 1;
+
+    while (left <= mid && right <= high) {
+        if (arr[left] <= arr[right]) temp.add(arr[left++]);
+        else temp.add(arr[right++]);
+    }
+
+    while (left <= mid) temp.add(arr[left++]);
+    while (right <= high) temp.add(arr[right++]);
+
+    for (int i = low; i <= high; i++)
+        arr[i] = temp.get(i - low);
+}
+```
+
+🟢 This ensures the merged segment remains sorted,
+which is required for counting pairs in the next merge step.
+
+---
+
+### 🔸 4. `team()` and `main()`
+
+```java
+public static int team(int[] skill, int n) {
+    return mergeSort(skill, 0, n - 1);
+}
+
+public static void main(String[] args) {
+    int[] a = {4, 1, 2, 3, 1};
+    int n = 5;
+    int cnt = team(a, n);
+    System.out.println("The number of reverse pair is: " + cnt);
+}
+```
+
+**Output:**
+
+```
+The number of reverse pair is: 4
+```
+
+---
+
+## 🧮 **Dry Run (Simplified Example)**
+
+Input:
+`arr = [4, 1, 2, 3, 1]`
+
+Sorted progression (recursive merge sort):
+
+```
+Left: [4, 1, 2] → [1, 2, 4]
+Right: [3, 1] → [1, 3]
+Merge final: [1, 1, 2, 3, 4]
+```
+
+During merging, pairs satisfying `arr[i] > 2*arr[j]` found are counted.
+
+Final count = 4 ✅
+
+---
+
+## ⏱️ **Complexity Analysis**
+
+| Step                        | Complexity     |
+| --------------------------- | -------------- |
+| Merge sort splitting        | O(log n)       |
+| Counting pairs (each level) | O(n)           |
+| **Overall Time**            | **O(n log n)** |
+| **Space (temporary array)** | **O(n)**       |
+
+---
+
+## ✅ **Key Points to Remember**
+
+* Similar to **counting inversions** problem.
+* Use `(long)` for comparisons like `arr[i] > 2 * arr[j]` to prevent overflow.
+* Don’t reset `right` pointer — it only moves forward.
+* Sorting is critical for maintaining the efficiency of the counting logic.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
