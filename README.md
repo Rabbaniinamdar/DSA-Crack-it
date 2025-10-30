@@ -3052,4 +3052,161 @@ class Solution {
 | 4    | Handle duplicates   | Avoid repeated results    |
 | 5    | Store valid sets    | Return final result       |
 
+---
+
+# 📘 Pascal’s Triangle — Notes
+
+---
+
+## 🧩 Problem Statement
+
+Generate the first `n` rows of **Pascal’s Triangle**, where:
+
+* Each number is the sum of the two numbers directly above it.
+* The first and last element of each row is always **1**.
+
+Example:
+For `n = 5`,
+
+```
+[
+ [1],
+ [1, 1],
+ [1, 2, 1],
+ [1, 3, 3, 1],
+ [1, 4, 6, 4, 1]
+]
+```
+
+---
+
+## 💡 Approach Used — Combinatorics Formula
+
+Each element in Pascal’s Triangle can be computed using the formula for **nCr**:
+
+[
+C(n, r) = \frac{n!}{r! (n - r)!}
+]
+
+But instead of recomputing factorials every time (which is inefficient), we use the **relation between consecutive elements** in a row:
+
+[
+C(n, r) = C(n, r-1) \times \frac{(n - r)}{r}
+]
+
+---
+
+## 🔧 Step-by-Step Logic
+
+### 1️⃣ `generateRow(int n)`
+
+Generates a single row of Pascal’s Triangle.
+
+* Start with `1` (C(n,0) = 1).
+* Use the above formula iteratively to compute each element:
+
+  ```java
+  ans = ans * (n - i) / i
+  ```
+* Add each computed value to the list.
+
+For example:
+If `n = 5`, the row = `[1, 4, 6, 4, 1]`
+
+---
+
+### 2️⃣ `generate(int n)`
+
+Generates all rows up to row `n`.
+
+* Loop from `1` to `n`
+* For each iteration, call `generateRow(i)`
+* Add the resulting row to the final list
+
+---
+
+## 🧮 Dry Run Example
+
+For `n = 5`:
+
+| i (Row no.) | Row Generated   |
+| ----------- | --------------- |
+| 1           | [1]             |
+| 2           | [1, 1]          |
+| 3           | [1, 2, 1]       |
+| 4           | [1, 3, 3, 1]    |
+| 5           | [1, 4, 6, 4, 1] |
+
+Final Output:
+
+```
+[
+ [1],
+ [1, 1],
+ [1, 2, 1],
+ [1, 3, 3, 1],
+ [1, 4, 6, 4, 1]
+]
+```
+
+---
+
+## 🧾 Code
+
+```java
+import java.util.*;
+
+class Solution {
+
+    // Function to generate one row of Pascal's Triangle
+    public static List<Integer> generateRow(int n) {
+        int ans = 1;
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        for (int i = 1; i < n; i++) {
+            ans = ans * (n - i);
+            ans = ans / i;
+            list.add(ans);
+        }
+        return list;
+    }
+
+    // Function to generate n rows of Pascal's Triangle
+    public static List<List<Integer>> generate(int n) {
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 1; i <= n; i++) {
+            ans.add(generateRow(i));
+        }
+        return ans;
+    }
+}
+```
+
+---
+
+## 🧠 Key Points
+
+✅ Uses mathematical relation between combinations
+✅ Avoids factorial computation (efficient)
+✅ Time Complexity: **O(n²)**
+✅ Space Complexity: **O(n²)**
+
+---
+
+## 🔍 Alternate Approach
+
+You can also generate Pascal’s Triangle using **dynamic programming** by building each row from the previous one:
+
+```java
+for (int i = 1; i <= n; i++) {
+    List<Integer> row = new ArrayList<>();
+    row.add(1);
+    for (int j = 1; j < i - 1; j++) {
+        row.add(prevRow.get(j - 1) + prevRow.get(j));
+    }
+    if (i > 1) row.add(1);
+    ans.add(row);
+}
+```
+
 
