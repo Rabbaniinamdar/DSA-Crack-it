@@ -3607,4 +3607,550 @@ Final count = 4 ✅
 * Sorting is critical for maintaining the efficiency of the counting logic.
 
 
----------------------------------------------------------------------------------------------------------------------------------------------
+---
+
+## 🧠 **1️⃣ Binary Search**
+
+You already wrote this:
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                st = mid + 1;
+            } else {
+                ed = mid - 1;
+            }
+        }
+        return -1;
+    }
+}
+```
+
+✅ **Goal:** Find the exact index of `target` in a sorted array.
+If not found → returns `-1`.
+
+⏱ **Time Complexity:** O(log n)
+
+---
+
+## 🧩 **2️⃣ Lower Bound**
+
+### 🔹 Definition:
+
+Lower Bound = **first index where element ≥ target**
+
+➡️ That means:
+
+* If the target **exists**, it gives the **first occurrence**.
+* If the target **doesn’t exist**, it gives the **index where target can be inserted**.
+
+---
+
+### ✅ **Code:**
+
+```java
+class Solution {
+    public int lowerBound(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        int ans = nums.length; // default: beyond last index
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] >= target) {
+                ans = mid;   // possible candidate
+                ed = mid - 1; // look on left side for smaller index
+            } else {
+                st = mid + 1; // need greater value
+            }
+        }
+        return ans;
+    }
+}
+```
+
+---
+
+### 🧮 **Example Dry Run**
+
+Input: `nums = [1, 3, 5, 6], target = 5`
+
+| st               | ed | mid | nums[mid] | Condition            | ans | Next |
+| ---------------- | -- | --- | --------- | -------------------- | --- | ---- |
+| 0                | 3  | 1   | 3         | 3 < 5 → move right   | 4   | st=2 |
+| 2                | 3  | 2   | 5         | 5 ≥ 5 → possible ans | 2   | ed=1 |
+| ✅ Output → **2** |    |     |           |                      |     |      |
+
+If `target = 4`,
+Output → **2** (index where 4 could be inserted)
+
+---
+
+## 🧩 **3️⃣ Upper Bound**
+
+### 🔹 Definition:
+
+Upper Bound = **first index where element > target**
+
+➡️ That means:
+
+* If multiple occurrences exist → gives **just after the last occurrence**.
+* If `target` is largest → returns `n`.
+
+---
+
+### ✅ **Code:**
+
+```java
+class Solution {
+    public int upperBound(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        int ans = nums.length;
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] > target) {
+                ans = mid;    // possible candidate
+                ed = mid - 1; // look left
+            } else {
+                st = mid + 1; // need greater value
+            }
+        }
+        return ans;
+    }
+}
+```
+
+---
+
+### 🧮 **Example Dry Run**
+
+Input: `nums = [1, 3, 5, 6], target = 5`
+
+| st               | ed | mid | nums[mid] | Condition          | ans | Next |
+| ---------------- | -- | --- | --------- | ------------------ | --- | ---- |
+| 0                | 3  | 1   | 3         | 3 ≤ 5 → move right | 4   | st=2 |
+| 2                | 3  | 2   | 5         | 5 ≤ 5 → move right | 4   | st=3 |
+| 3                | 3  | 3   | 6         | 6 > 5 → candidate  | 3   | ed=2 |
+| ✅ Output → **3** |    |     |           |                    |     |      |
+
+---
+
+## ✅ **4️⃣ Combined Class Example**
+
+Here’s a full working example:
+
+```java
+class Solution {
+
+    // Standard Binary Search
+    public int search(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] == target) return mid;
+            else if (nums[mid] < target) st = mid + 1;
+            else ed = mid - 1;
+        }
+        return -1;
+    }
+
+    // Lower Bound: first index where nums[i] >= target
+    public int lowerBound(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1, ans = nums.length;
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] >= target) {
+                ans = mid;
+                ed = mid - 1;
+            } else st = mid + 1;
+        }
+        return ans;
+    }
+
+    // Upper Bound: first index where nums[i] > target
+    public int upperBound(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1, ans = nums.length;
+        while (st <= ed) {
+            int mid = st + (ed - st) / 2;
+            if (nums[mid] > target) {
+                ans = mid;
+                ed = mid - 1;
+            } else st = mid + 1;
+        }
+        return ans;
+    }
+
+    // Example usage
+    public static void main(String[] args) {
+        Solution s = new Solution();
+        int[] nums = {1, 3, 5, 6};
+
+        System.out.println("Binary Search (target=5): " + s.search(nums, 5)); // 2
+        System.out.println("Lower Bound (target=5): " + s.lowerBound(nums, 5)); // 2
+        System.out.println("Upper Bound (target=5): " + s.upperBound(nums, 5)); // 3
+        System.out.println("Lower Bound (target=4): " + s.lowerBound(nums, 4)); // 2
+        System.out.println("Upper Bound (target=4): " + s.upperBound(nums, 4)); // 2
+    }
+}
+```
+
+---
+
+## ⚡ Summary
+
+| Function       | Meaning                               | Example (nums=[1,3,5,6], target=5) | Output |
+| -------------- | ------------------------------------- | ---------------------------------- | ------ |
+| `search()`     | Exact index of `target`               | finds 5                            | 2      |
+| `lowerBound()` | First index where `nums[i] >= target` | first ≥ 5                          | 2      |
+| `upperBound()` | First index where `nums[i] > target`  | first > 5                          | 3      |
+
+---
+
+# 📚 **Binary Search Variants — Search Insert | Floor | Ceil**
+
+---
+
+## 🔹 1. Search Insert Position
+
+### 🧠 **Concept**
+
+Find the index where a target should be **inserted** in a sorted array to maintain order.
+If the element is already present, return its **index**.
+
+### ⚙️ **Approach**
+
+1. Use **binary search**.
+2. If `nums[mid] == target` → return `mid`.
+3. If `nums[mid] < target` → move to right half (`low = mid + 1`).
+4. If `nums[mid] > target` → move to left half (`high = mid - 1`).
+5. When search ends, `low` will be the **insert position**.
+
+---
+
+### 🧩 **Example**
+
+```
+nums = [1, 3, 5, 6], target = 2
+mid = 1 → nums[mid]=3>2 → move left → high=0
+mid = 0 → nums[mid]=1<2 → move right → low=1
+Stop: low=1, high=0 → Insert position = 1
+```
+
+✅ **Output:** 1
+
+---
+
+### 💻 **Code (Java)**
+
+```java
+class SearchInsertPosition {
+    public int searchInsert(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (nums[mid] == target)
+                return mid;
+            else if (nums[mid] < target)
+                low = mid + 1;
+            else
+                high = mid - 1;
+        }
+        return low; // position where target should be inserted
+    }
+}
+```
+
+---
+
+### ⏱ **Time Complexity:** O(log N)
+
+### 💾 **Space Complexity:** O(1)
+
+---
+
+## 🔹 2. Floor of a Number
+
+### 🧠 **Concept**
+
+The **floor** of a number `x` is the **largest element ≤ x** in a sorted array.
+If no such element exists, return `-1`.
+
+---
+
+### ⚙️ **Approach**
+
+1. Initialize `low = 0`, `high = n - 1`, `ans = -1`.
+2. Perform binary search:
+
+   * If `arr[mid] ≤ x`, store `ans = arr[mid]` and move right → `low = mid + 1`.
+   * Else move left → `high = mid - 1`.
+3. After loop ends, `ans` is the floor value.
+
+---
+
+### 🧩 **Example**
+
+```
+arr = [3, 4, 4, 7, 8, 10], x = 5
+mid = 2 → arr[2]=4≤5 → ans=4 → low=3
+mid = 4 → arr[4]=8>5 → high=3
+mid = 3 → arr[3]=7>5 → high=2
+✅ Floor = 4
+```
+
+---
+
+### 💻 **Code (Java)**
+
+```java
+public class FloorValue {
+    static int findFloor(int[] arr, int n, int x) {
+        int low = 0, high = n - 1;
+        int ans = -1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (arr[mid] <= x) {
+                ans = arr[mid];  // possible floor
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {3, 4, 4, 7, 8, 10};
+        int x = 5;
+        System.out.println("Floor = " + findFloor(arr, arr.length, x));
+    }
+}
+```
+
+---
+
+### ⏱ **Time Complexity:** O(log N)
+
+### 💾 **Space Complexity:** O(1)
+
+---
+
+## 🔹 3. Ceil of a Number
+
+### 🧠 **Concept**
+
+The **ceil** of a number `x` is the **smallest element ≥ x** in a sorted array.
+If no such element exists, return `-1`.
+
+---
+
+### ⚙️ **Approach**
+
+1. Initialize `low = 0`, `high = n - 1`, `ans = -1`.
+2. Perform binary search:
+
+   * If `arr[mid] ≥ x`, store `ans = arr[mid]` and move left → `high = mid - 1`.
+   * Else move right → `low = mid + 1`.
+3. After loop ends, `ans` is the ceil value.
+
+---
+
+### 🧩 **Example**
+
+```
+arr = [3, 4, 4, 7, 8, 10], x = 5
+mid = 2 → arr[2]=4<5 → low=3
+mid = 4 → arr[4]=8≥5 → ans=8 → high=3
+mid = 3 → arr[3]=7≥5 → ans=7 → high=2
+✅ Ceil = 7
+```
+
+---
+
+### 💻 **Code (Java)**
+
+```java
+public class CeilValue {
+    static int findCeil(int[] arr, int n, int x) {
+        int low = 0, high = n - 1;
+        int ans = -1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (arr[mid] >= x) {
+                ans = arr[mid];  // possible ceil
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {3, 4, 4, 7, 8, 10};
+        int x = 5;
+        System.out.println("Ceil = " + findCeil(arr, arr.length, x));
+    }
+}
+```
+
+---
+
+### ⏱ **Time Complexity:** O(log N)
+
+### 💾 **Space Complexity:** O(1)
+
+---
+
+## ✅ **Summary Table**
+
+| Concept           | Definition                 | Returns | Example (x = 5)  | Result |
+| ----------------- | -------------------------- | ------- | ---------------- | ------ |
+| **Search Insert** | Position to insert element | Index   | `[1,3,5,6]`      | 1      |
+| **Floor**         | Greatest element ≤ x       | Value   | `[3,4,4,7,8,10]` | 4      |
+| **Ceil**          | Smallest element ≥ x       | Value   | `[3,4,4,7,8,10]` | 7      |
+
+---
+Perfect 👍 — this code is for the **LeetCode problem**
+
+# 📘 **Binary Search – Find First and Last Position of Element in Sorted Array**
+
+---
+
+## 🧠 **Concept**
+
+Given a **sorted array** and a **target value**, you need to find the **starting and ending index** of the target in the array.
+
+If the target does not exist → return `[-1, -1]`.
+
+---
+
+## ⚙️ **Approach**
+
+We can solve this using **two binary searches**:
+
+1. **Find First Occurrence** of `target`
+2. **Find Last Occurrence** of `target`
+
+### 🔹 Step 1: Find First Occurrence
+
+* Use Binary Search.
+* When `nums[mid] == target`, **store index** and move **left** (`end = mid - 1`) to find earlier occurrence.
+
+### 🔹 Step 2: Find Last Occurrence
+
+* Use Binary Search again.
+* When `nums[mid] == target`, **store index** and move **right** (`start = mid + 1`) to find later occurrence.
+
+---
+
+## 🧩 **Example**
+
+### Input:
+
+```
+nums = [5, 7, 7, 8, 8, 10], target = 8
+```
+
+### 🔸 Finding First Occurrence:
+
+```
+mid = 2 → nums[mid]=7 < 8 → st=3
+mid = 4 → nums[mid]=8 == 8 → idx=4, move left → ed=3
+mid = 3 → nums[mid]=8 == 8 → idx=3, move left → ed=2 (stop)
+✅ first = 3
+```
+
+### 🔸 Finding Last Occurrence:
+
+```
+mid = 2 → nums[mid]=7 < 8 → st=3
+mid = 4 → nums[mid]=8 == 8 → idx=4, move right → st=5
+mid = 5 → nums[mid]=10 > 8 → ed=4 (stop)
+✅ last = 4
+```
+
+✅ **Output:** `[3, 4]`
+
+---
+
+## 💻 **Code (Java)**
+
+```java
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        int[] result = new int[2];
+        result[0] = findFirst(nums, target);
+        result[1] = findLast(nums, target);
+        return result;
+    }
+
+    public int findFirst(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        int idx = -1;
+        while (st <= ed) {
+            int mid = (st + ed) / 2;
+            if (nums[mid] == target) {
+                idx = mid;        // possible first
+                ed = mid - 1;     // move left to check for earlier occurrence
+            } else if (nums[mid] < target) {
+                st = mid + 1;
+            } else {
+                ed = mid - 1;
+            }
+        }
+        return idx;
+    }
+
+    public int findLast(int[] nums, int target) {
+        int st = 0, ed = nums.length - 1;
+        int idx = -1;
+        while (st <= ed) {
+            int mid = (st + ed) / 2;
+            if (nums[mid] == target) {
+                idx = mid;        // possible last
+                st = mid + 1;     // move right to check for later occurrence
+            } else if (nums[mid] < target) {
+                st = mid + 1;
+            } else {
+                ed = mid - 1;
+            }
+        }
+        return idx;
+    }
+}
+```
+
+---
+
+## 🧮 **Output Example**
+
+| Input          | Target | Output  |
+| -------------- | ------ | ------- |
+| [5,7,7,8,8,10] | 8      | [3,4]   |
+| [5,7,7,8,8,10] | 6      | [-1,-1] |
+| [1]            | 1      | [0,0]   |
+
+---
+
+## ⏱ **Time Complexity:** O(log N)
+
+## 💾 **Space Complexity:** O(1)
+
+---
+
+## ✅ **Key Takeaways**
+
+* Use **two separate binary searches** for first and last occurrence.
+* Move:
+
+  * **Left** when finding the first occurrence.
+  * **Right** when finding the last occurrence.
+* Return `[-1, -1]` if element not found.
+
+---
+
