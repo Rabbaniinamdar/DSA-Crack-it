@@ -4154,3 +4154,349 @@ class Solution {
 
 ---
 
+
+## 🧩 1️⃣ Search in Rotated Sorted Array (Without Duplicates)
+
+**Problem:**
+You are given a rotated sorted array (no duplicates). Find the index of the target element using binary search.
+If the target doesn’t exist, return `-1`.
+
+---
+
+### 🔍 **Example**
+
+```
+Input: nums = [4,5,6,7,0,1,2], target = 0  
+Output: 4
+```
+
+---
+
+### 🧠 **Approach (Binary Search on Rotated Array)**
+
+Even though the array is rotated, one half of it is **always sorted** — either the left half or the right half.
+So, in each iteration of binary search:
+
+1. Find `mid`.
+2. Check which part (left or right) is sorted.
+3. If target lies in that sorted part → search there.
+   Otherwise, search in the other part.
+
+---
+
+### ⚙️ **Steps**
+
+1. Initialize `low = 0`, `high = n - 1`.
+2. While `low <= high`:
+
+   * Compute `mid = low + (high - low) / 2`
+   * If `nums[mid] == target` → return `mid`
+   * If **right half** is sorted (`nums[mid] < nums[high]`):
+
+     * If `target` lies in this range (`nums[mid] <= target <= nums[high]`)
+       → `low = mid + 1`
+     * Else → `high = mid - 1`
+   * Else (**left half is sorted**):
+
+     * If `target` lies in this range (`nums[low] <= target <= nums[mid]`)
+       → `high = mid - 1`
+     * Else → `low = mid + 1`
+3. Return `-1` (not found)
+
+---
+
+### 💻 **Code**
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) return mid;
+
+            // Right half is sorted
+            if (nums[mid] < nums[high]) {
+                if (target >= nums[mid] && target <= nums[high]) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            // Left half is sorted
+            else {
+                if (target >= nums[low] && target <= nums[mid]) {
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+---
+
+### ⏱️ **Time Complexity**
+
+* **O(log n)** — Binary Search
+
+### 💾 **Space Complexity**
+
+* **O(1)** — Constant space
+
+---
+
+## 🧩 2️⃣ Search in Rotated Sorted Array (With Duplicates)
+
+**Problem:**
+Same as above, but array may contain **duplicates**.
+
+---
+
+### 🧠 **Approach**
+
+Duplicates cause ambiguity — when `nums[low] == nums[mid] == nums[high]`,
+we cannot decide which half is sorted.
+➡️ So, we **shrink the boundaries** by doing:
+
+```
+low++
+high--
+```
+
+Then continue normal binary search logic.
+
+---
+
+### 💻 **Code**
+
+```java
+class Solution {
+    public boolean search(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] == target) return true;
+
+            // Handle duplicates
+            if (nums[low] == nums[mid] && nums[mid] == nums[high]) {
+                low++;
+                high--;
+                continue;
+            }
+
+            // Right half sorted
+            if (nums[mid] <= nums[high]) {
+                if (target >= nums[mid] && target <= nums[high]) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            // Left half sorted
+            else {
+                if (target >= nums[low] && target <= nums[mid]) {
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            }
+        }
+        return false;
+    }
+}
+```
+
+---
+
+### ⚙️ **Key Differences from No-Duplicate Version**
+
+| Case                                        | No-Duplicates | With Duplicates        |
+| ------------------------------------------- | ------------- | ---------------------- |
+| When `nums[low] == nums[mid] == nums[high]` | Never happens | Shrink both ends       |
+| Return type                                 | `int` (index) | `boolean` (true/false) |
+
+---
+
+### ⏱️ **Time Complexity**
+
+* **Average:** O(log n)
+* **Worst (due to duplicates):** O(n)
+
+### 💾 **Space Complexity**
+
+* **O(1)**
+
+# 🔹 **Find Minimum in Rotated Sorted Array**
+
+---
+
+## 🧠 **Concept**
+
+A **rotated sorted array** is formed by taking a sorted array and rotating it around a pivot.
+Example:
+`[0,1,2,4,5,6,7] → [4,5,6,7,0,1,2]`
+
+Our goal is to find the **smallest (minimum) element** in this rotated array efficiently using **Binary Search**.
+
+---
+
+## ⚙️ **Approach**
+
+### ✅ **Key Observation**
+
+In a rotated sorted array:
+
+* One half is **always sorted**.
+* The **minimum element lies in the unsorted half**.
+
+We compare `nums[mid]` and `nums[high]` to determine which half is unsorted.
+
+---
+
+### 🧩 **Algorithm (Without Duplicates)**
+
+1. Initialize pointers:
+
+   ```java
+   int st = 0, ed = nums.length - 1;
+   ```
+2. While `st < ed`:
+
+   * Find the mid index:
+
+     ```java
+     int mid = (st + ed) / 2;
+     ```
+   * If `nums[mid] > nums[ed]` → Minimum lies **right side**
+     → move `st = mid + 1`
+   * Else → Minimum lies **left side** (including mid)
+     → move `ed = mid`
+3. When loop ends, both `st` and `ed` point to the minimum element:
+
+   ```java
+   return nums[st];
+   ```
+
+---
+
+### 🧠 **Why Compare with nums[ed]?**
+
+* Because the rightmost element helps identify if the rotation has affected the right side.
+* If `nums[mid] > nums[ed]`, the smallest element must be in the right half.
+
+---
+
+### 🧩 **Example Walkthrough**
+
+```
+nums = [4,5,6,7,0,1,2]
+```
+
+| Step     | st   | ed   | mid | nums[mid] | nums[ed] | Action        |
+| -------- | ---- | ---- | --- | --------- | -------- | ------------- |
+| 1        | 0    | 6    | 3   | 7         | 2        | mid>ed → st=4 |
+| 2        | 4    | 6    | 5   | 1         | 2        | mid≤ed → ed=5 |
+| 3        | 4    | 5    | 4   | 0         | 1        | mid≤ed → ed=4 |
+| ✅ Result | st=4 | ed=4 | —   | —         | —        | nums[4]=0     |
+
+✅ **Minimum Element = 0**
+
+---
+
+### ⏱ **Time Complexity**
+
+`O(log N)` — standard binary search complexity
+
+### 💾 **Space Complexity**
+
+`O(1)` — constant space
+
+---
+
+## 🔸 **Code (Without Duplicates)**
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int st = 0, ed = nums.length - 1;
+        while (st < ed) {
+            int mid = (st + ed) / 2;
+            if (nums[mid] > nums[ed]) {
+                st = mid + 1;
+            } else {
+                ed = mid;
+            }
+        }
+        return nums[st];
+    }
+}
+```
+
+---
+
+## 🔹 **When Array Contains Duplicates** (Leetcode #154)
+
+When duplicates exist (e.g., `[2,2,2,0,1,2]`),
+`nums[mid] == nums[ed]` can’t tell which half is unsorted → shrink search space.
+
+---
+
+### ✅ **Modified Steps**
+
+1. If `nums[mid] < nums[ed]` → go left (`ed = mid`)
+2. If `nums[mid] > nums[ed]` → go right (`st = mid + 1`)
+3. If `nums[mid] == nums[ed]` → reduce range (`ed--`)
+
+---
+
+### 🔸 **Code (With Duplicates)**
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int st = 0, ed = nums.length - 1;
+        while (st < ed) {
+            int mid = (st + ed) / 2;
+            if (nums[mid] < nums[ed]) {
+                ed = mid;
+            } else if (nums[mid] > nums[ed]) {
+                st = mid + 1;
+            } else {
+                ed--;  // duplicates case
+            }
+        }
+        return nums[st];
+    }
+}
+```
+
+---
+
+## 📘 **Quick Summary Table**
+
+| Case                    | Condition        | Action         | Meaning              |
+| ----------------------- | ---------------- | -------------- | -------------------- |
+| `nums[mid] > nums[ed]`  | Minimum is right | `st = mid + 1` | Left half sorted     |
+| `nums[mid] < nums[ed]`  | Minimum is left  | `ed = mid`     | Right half sorted    |
+| `nums[mid] == nums[ed]` | Duplicates       | `ed--`         | Reduce search window |
+
+---
+
+## 🧾 **Key Takeaways**
+
+* **Compare `nums[mid]` with `nums[ed]`** to find the unsorted half.
+* When duplicates exist → use `ed--` to shrink safely.
+* Works in **O(log N)** for unique elements,
+  but can degrade to **O(N)** when all elements are equal.
+
+---
